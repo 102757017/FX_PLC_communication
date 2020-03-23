@@ -58,13 +58,17 @@
 
 pass
 
+------
+
 
 
 # PLC地址对照表
 
-![image-20200323093129960](C:\Users\hewei\AppData\Roaming\Typora\typora-user-images\image-20200323093129960.png)
+![avatar]([https://github.com/102757017/FX_PLC_communication/blob/master/address1.png]
 
-![image-20200323093250974](C:\Users\hewei\AppData\Roaming\Typora\typora-user-images\image-20200323093250974.png)
+![avatar]([https://github.com/102757017/FX_PLC_communication/blob/master/address2.png]
+
+------
 
 
 
