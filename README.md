@@ -64,9 +64,9 @@ pass
 
 # PLC地址对照表
 
-![avatar]([https://github.com/102757017/FX_PLC_communication/blob/master/address1.png]
+![软元件地址] (https://github.com/102757017/FX_PLC_communication/blob/master/address1.png?raw=true)
 
-![avatar]([https://github.com/102757017/FX_PLC_communication/blob/master/address2.png]
+![寄存器地址] (https://github.com/102757017/FX_PLC_communication/blob/master/address2.png?raw=true)
 
 ------
 
