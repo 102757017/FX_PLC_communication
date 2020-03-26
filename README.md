@@ -64,9 +64,15 @@ pass
 
 # PLC地址对照表
 
-![软元件地址](https://github.com/102757017/FX_PLC_communication/raw/master/address1.png)
+位元件地址表：
 
-![寄存器地址](https://github.com/102757017/FX_PLC_communication/raw/master/address2.png)
+![image-20200326201413205](https://gitee.com/sunny_ho/image_bed/raw/master/img/image-20200326201413205.png)
+
+
+
+寄存器地址表：
+
+![image-20200326201433516](https://gitee.com/sunny_ho/image_bed/raw/master/img/image-20200326201433516.png)
 
 ------
 
@@ -76,16 +82,9 @@ pass
 
 #### 1.在seting.ini中设置串口连接的参数，需要与PLC内的串口参数设置成相同的。
 
-[Serial_settings]
-COM_No = COM8
-baud = 9600
-timeout = 5
-bytesize = 7
-stopbits = 1
-parity = EVEN
-;parity可选参数有None、ODD、EVEN
-[frequency]
-Intervals=5
+#### PLC内的串口参数可以通过GX WORK设置
+
+![image-20200326201607297](https://gitee.com/sunny_ho/image_bed/raw/master/img/image-20200326201607297.png)
 
 #### 2.代码的使用
 
