@@ -6,6 +6,7 @@ import configparser
 import os
 from binascii import a2b_hex,b2a_hex
 import struct
+import time
 
 
 #comp:寄存器或元件的编号，例如"Y10"
@@ -195,6 +196,7 @@ def read_onoff_element(ser,comp,size):
             else:
                 print("{}{}~{}{}:{}".format(modle,first_element+i*8+7,modle,first_element+i*8,x))
             i=i+1
+        return t
     else:
         print("Checksum NG")
         #print(trans(buffer))
@@ -233,6 +235,7 @@ def read_register(ser,comp,size):
     else:
         print("Checksum NG")
 
+#如果连接串口成功会返回串口实例，连接失败会返回False
 def config_ser():
     #在传递键值对数据时，会将键名 全部转化为小写
     conf = configparser.ConfigParser()
@@ -258,9 +261,19 @@ def config_ser():
         conf.write(open('seting.ini', 'w'))
     try:
         ser=serial.Serial(port=COM_No,baudrate=baud,bytesize=bytesize,parity=parity,stopbits = stopbits,timeout=timeout)
-        return ser
+        #发送连接测试命令
+        ser.write(b'\x05')
+        buffer=ser.read(1)
+        if buffer==b'\x06':
+            print("成功连接下位机")
+            return ser
+        else:
+            print("连接下位机失败，请检查串口连接线是否松动，PLC是否开启，串口配置参数是否正确")
+            return False
+
     except BaseException as e:
         print("串口连接失败,请核对连线及COM口编号:",e)
+        return False
 
 
 def trans(s):
@@ -277,10 +290,11 @@ if __name__=="__main__":
     '''
     #创建串口连接
     ser=config_ser()
-    #将Y1的值置为1
-    Set_Reset(ser,"Y1",1)
-    #从Y04的地址开始读取，读取24个开关量
-    read_onoff_element(ser,"Y4",24)
-    #从寄存器D21开始读取，读取3个寄存器的值（16位整数格式）
-    read_register(ser,"D21",3)
-    ser.close()
+    if ser !=False:
+        #将Y1的值置为1
+        Set_Reset(ser,"Y1",1)
+        #从Y04的地址开始读取，读取24个开关量
+        M=read_onoff_element(ser,"M8",16)
+        #从寄存器D21开始读取，读取3个寄存器的值（16位整数格式）
+        read_register(ser,"D21",3)
+        ser.close()
