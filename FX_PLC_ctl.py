@@ -155,8 +155,19 @@ def Set_Reset(ser,comp,value):
     cmd=stx+order+ADDRESS+etx+SUM
     ser.write(cmd)
     buffer=ser.read(1)
-
     
+    def case1():
+        print("置/复位成功")
+    def case2():
+        print("置/复位失败")
+    def case3():
+        print("置/复位返回值为空，超时")
+    def default():
+        print("置/复位过程发生未预料到的错误，PLC返回值是{}".format(buffer))
+    switch = {b'\x06': case1, b'\x15': case2,b'': case3}
+    switch.get(buffer, default)()
+
+
 
 #ser,串口连接实例
 #comp:位元件的编号，例如"Y10"
@@ -179,9 +190,17 @@ def read_onoff_element(ser,comp,size):
     buffer_size=4+data_size
     buffer=ser.read(buffer_size)
 
-    #执行和校验，判断数据传输是否出错
-    if Checksum(buffer)==1:
-        #print(trans(buffer))
+    try:
+        if buffer==b"":
+            raise ValueError("读取软元件返回值为空，超时，请检查串口连接线是否松动，PLC是否开启")
+        else:
+            if len(buffer)!=buffer_size:
+                raise ValueError("读取软元件返回值长度不足，数据传输出错，请检查串口参数")
+            
+        #执行和校验，判断数据传输是否出错
+        if Checksum(buffer)!=1:
+            raise ValueError("读取软元件 Checksum NG,数据传输出错，请检查串口参数")
+        
         #接收的数据第二位开始为元件的状态值
         data=buffer[1:1+data_size]
         data=a2b_hex(data)
@@ -197,9 +216,12 @@ def read_onoff_element(ser,comp,size):
                 print("{}{}~{}{}:{}".format(modle,first_element+i*8+7,modle,first_element+i*8,x))
             i=i+1
         return t
-    else:
-        print("Checksum NG")
-        #print(trans(buffer))
+    
+    except ValueError as e:
+        print('错误信息是:', e)
+    
+    except BaseException as e:
+        print('读取软元件发生未预料到的错误:', e)
 
 
 #ser,串口连接实例
@@ -221,8 +243,17 @@ def read_register(ser,comp,size):
     buffer_size=4+data_size
     buffer=ser.read(buffer_size)
 
-    #执行和校验，判断数据传输是否出错
-    if Checksum(buffer)==1:
+    try:
+        if buffer==b"":
+            raise ValueError("读取寄存器返回值为空，超时，请检查串口连接线是否松动，PLC是否开启")
+        else:
+            if len(buffer)!=buffer_size:
+                raise ValueError("读取寄存器返回值长度不足，数据传输出错，请检查串口参数")
+            
+        #执行和校验，判断数据传输是否出错
+        if Checksum(buffer)!=1:
+            raise ValueError("读取寄存器Checksum NG,数据传输出错，请检查串口参数")
+                   
         #接收的数据第二位开始为寄存器的值
         data=buffer[1:1+data_size]
         #data=b"\x43\x33\x30\x42\x46\x41\x30\x31"
@@ -232,8 +263,13 @@ def read_register(ser,comp,size):
         
         for i in range(size):
             print("{}{}:{}".format(modle,first_element+i,t[i]))
-    else:
-        print("Checksum NG")
+            
+    except ValueError as e:
+        print('错误信息是:', e)
+    
+    except BaseException as e:
+        print('读取寄存器发生未预料到的错误:', e)
+        
 
 #如果连接串口成功会返回串口实例，连接失败会返回False
 def config_ser():
@@ -264,12 +300,33 @@ def config_ser():
         #发送连接测试命令
         ser.write(b'\x05')
         buffer=ser.read(1)
+
+        def case1():
+            print("成功连接下位机")
+            return ser
+
+        def case2():
+            print("测试连接命令的返回值为空，超时，请检查串口连接线是否松动，PLC是否开启")
+            return False
+            
+        def default():
+            printprint("测试连接命令的返回值为：{}，请检查串口连接线是否松动，PLC是否开启，串口配置参数是否正确".format(buffer))
+            return False
+
+        switch = {b'\x06': case1, b'': case2}
+        r=switch.get(buffer, default)()
+        return r
+        
+        '''
         if buffer==b'\x06':
             print("成功连接下位机")
             return ser
+        if buffer==b'':
+            print("测试连接命令的返回值为空，超时，请检查串口连接线是否松动，PLC是否开启")
         else:
-            print("连接下位机失败，请检查串口连接线是否松动，PLC是否开启，串口配置参数是否正确")
+            print("测试连接命令的返回值为：{}，请检查串口连接线是否松动，PLC是否开启，串口配置参数是否正确".format(buffer))
             return False
+        '''
 
     except BaseException as e:
         print("串口连接失败,请核对连线及COM口编号:",e)
@@ -290,11 +347,13 @@ if __name__=="__main__":
     '''
     #创建串口连接
     ser=config_ser()
+
     if ser !=False:
+
         #将Y1的值置为1
         Set_Reset(ser,"Y1",1)
         #从Y04的地址开始读取，读取24个开关量
-        M=read_onoff_element(ser,"M8",16)
+        M=read_onoff_element(ser,"Y04",24)
         #从寄存器D21开始读取，读取3个寄存器的值（16位整数格式）
         read_register(ser,"D21",3)
         ser.close()
