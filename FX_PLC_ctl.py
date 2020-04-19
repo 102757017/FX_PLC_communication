@@ -7,7 +7,7 @@ import os
 from binascii import a2b_hex,b2a_hex
 import struct
 import time
-
+import sys
 
 #comp:寄存器或元件的编号，例如"Y10"
 def const_addres(comp):
@@ -337,6 +337,9 @@ def trans(s):
     return "b'%s'" % ''.join('\\x%.2x' % x for x in s)    
 
 
+
+
+
 if __name__=="__main__":
     '''
     comp="M0"
@@ -345,6 +348,12 @@ if __name__=="__main__":
     cmd=const_read_cmd(address,"01")
     print("读取命令：",trans(cmd))
     '''
+    if getattr(sys, 'frozen', False):
+        bundle_dir = sys._MEIPASS
+    else:
+        bundle_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(bundle_dir)
+
     #创建串口连接
     ser=config_ser()
 
