@@ -7,7 +7,7 @@ import os
 from binascii import a2b_hex,b2a_hex
 import struct
 import time
-import sys
+
 
 #comp:寄存器或元件的编号，例如"Y10"
 def const_addres(comp):
@@ -18,7 +18,7 @@ def const_addres(comp):
         base_addr=0x0000
         dev_addr=serial//8
         first_element=dev_addr*8
-        address=base_addr+dev_addr    
+        address=base_addr+dev_addr
 
     if modle=="X":
         base_addr=0x0080
@@ -44,6 +44,11 @@ def const_addres(comp):
         dev_addr=serial//8
         first_element=dev_addr*8
         address=base_addr+dev_addr
+
+    if modle=="C":
+        base_addr=0x0A00
+        first_element=serial
+        address=base_addr+serial*2
         
     if modle=="D":
         base_addr=0x1000
@@ -226,7 +231,7 @@ def read_onoff_element(ser,comp,size):
 
 #ser,串口连接实例
 #comp:寄存器的编号，例如"D10"
-#size：连续读取几个寄存器的数据，每个寄存器是16位的（2字节）
+#size：连续读取几个寄存器的数据，每个寄存器是16位的（2字节），最多只能连续读取4个寄存器的值
 def read_register(ser,comp,size):
     modle=comp[0].upper()
     
@@ -263,6 +268,7 @@ def read_register(ser,comp,size):
         
         for i in range(size):
             print("{}{}:{}".format(modle,first_element+i,t[i]))
+        return t
             
     except ValueError as e:
         print('错误信息是:', e)
@@ -337,9 +343,6 @@ def trans(s):
     return "b'%s'" % ''.join('\\x%.2x' % x for x in s)    
 
 
-
-
-
 if __name__=="__main__":
     '''
     comp="M0"
@@ -348,12 +351,6 @@ if __name__=="__main__":
     cmd=const_read_cmd(address,"01")
     print("读取命令：",trans(cmd))
     '''
-    if getattr(sys, 'frozen', False):
-        bundle_dir = sys._MEIPASS
-    else:
-        bundle_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(bundle_dir)
-
     #创建串口连接
     ser=config_ser()
 
